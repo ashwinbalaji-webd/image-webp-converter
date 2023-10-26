@@ -1,6 +1,17 @@
 <?php
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
+
+    if(!file_exists('images')){
+        if(mkdir('images', 0777)){
+            mkdir('images/uploads', 0777);
+            mkdir('images/webp', 0777);
+        }
+        else{
+            echo json_encode(['success' => false, 'error' => 'Failed to create images directory.']);
+        }
+    }
+
     $uploadDir = 'images/uploads/';
     $uploadFile = $uploadDir . basename($_FILES['image']['name']);
 
