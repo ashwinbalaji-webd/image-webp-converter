@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!file_exists('images')) {
-        if (!(mkdir('images', 0777))) {
+        if (!(mkdir('images'))) {
             echo json_encode(['success' => false, 'error' => 'Failed to create images directory.']);
         }
     }
