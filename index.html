@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image WebP Converter</title>
+  </head>
+  <body>
+    <div id="form">
+      <h4>Image WebP Converter</h4>
+      <form id="imageForm" name="imageForm" enctype="multipart/form-data" method="post">
+        <input type="file" id="imageInput" name="image" accept="image/*" required/>
+        <button type="submit" value="upload">Upload</button>
+      </form>
+    </div>
+    <div id="result"></div>
+    <script src="./script.js"></script>
+  </body>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    #form {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      padding: 2rem;
+      background-color: beige;
+      border-radius: 0.8rem;
+      box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+      margin-block-start: 1rem;
+    }
+  </style>
+</html>
