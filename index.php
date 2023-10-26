@@ -1,38 +1,79 @@
 <?php
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['image'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    if(!file_exists('images')){
-        if(mkdir('images', 0777)){
-            mkdir('images/uploads', 0777);
-            mkdir('images/webp', 0777);
-        }
-        else{
+    $postData = file_get_contents('php://input');
+
+
+    if ($postData && !is_null($postData)) {
+        $postData = json_decode($postData, true);
+    } else {
+    }
+
+    if (!file_exists('images')) {
+        if (!(mkdir('images', 0777))) {
             echo json_encode(['success' => false, 'error' => 'Failed to create images directory.']);
         }
     }
 
-    $uploadDir = 'images/uploads/';
-    $uploadFile = $uploadDir . basename($_FILES['image']['name']);
+    $uploadDir = 'images/' . $postData['uploadDir'];
 
-    if (move_uploaded_file($_FILES['image']['tmp_name'], $uploadFile)) {
-        $outputPath = 'images/webp/' . uniqid() . '.webp';
+    if (file_exists($uploadDir)) {
+        deleteFolder($uploadDir);
+    }
 
-        $image = imagecreatefromstring(file_get_contents($uploadFile));
-        if ($image !== false) {
-            if (imagewebp($image, $outputPath)) {
-                imagedestroy($image);
+    if (mkdir($uploadDir)) {
 
-                echo json_encode(['success' => true, 'path' => $outputPath]);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Failed to convert to WebP.']);
-            }
-        } else {
-            echo json_encode(['success' => false, 'error' => 'Invalid image format.']);
-        }
+        $_AimagePaths =  array_map(function ($_SimagePath) {
+            global $uploadDir;
+            return compressAndStoreImage($_SimagePath, $uploadDir);
+        }, $postData['images']);
+
+        echo json_encode(['success' => true, 'paths' => $_AimagePaths]);
     } else {
-        echo json_encode(['success' => false, 'error' => 'Failed to upload image.']);
+        echo json_encode(['success' => false, 'error' => 'Failed to create package directory.']);
     }
 } else {
     echo json_encode(['success' => false, 'error' => 'Invalid request.']);
+}
+
+function compressAndStoreImage($imageURL, $outputDirectory)
+{
+
+    $imageData = file_get_contents($imageURL);
+
+    if (!$imageData) return false;
+
+    $image = imagecreatefromstring($imageData);
+
+    if (!$image) return false;
+
+    $baseNameWithoutExtension = pathinfo($imageURL, PATHINFO_FILENAME);
+    $outputPath = $outputDirectory . '/' . $baseNameWithoutExtension . '.webp';
+
+    imagewebp($image, $outputPath, 80);
+
+    imagedestroy($image);
+
+    return $outputPath;
+}
+
+
+
+function deleteFolder($folderPath)
+{
+    if (is_dir($folderPath)) {
+        $files = scandir($folderPath);
+        foreach ($files as $file) {
+            if ($file != "." && $file != "..") {
+                $filePath = $folderPath . DIRECTORY_SEPARATOR . $file;
+                if (is_dir($filePath)) {
+                    deleteFolder($filePath);
+                } else {
+                    unlink($filePath);
+                }
+            }
+        }
+        rmdir($folderPath);
+    }
 }
